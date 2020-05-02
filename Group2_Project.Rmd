@@ -1,0 +1,78 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r message=FALSE}
+library(tidyverse)
+```
+
+# Import Files
+```{r message=FALSE}
+coffeeDrug <- read_table("coffee_drug_1114_1165.dat")
+coffeeDrug$SY <- as.character(coffeeDrug$SY)
+coffeeDrug$GE <- as.character(coffeeDrug$GE)
+coffeeDrug$VEND <- as.character(coffeeDrug$VEND)
+coffeeDrug$ITEM <- as.character(coffeeDrug$ITEM)
+```
+```{r message=FALSE}
+coffeeGroc <- read_table("coffee_groc_1114_1165.dat")
+coffeeGroc$SY <- as.character(coffeeGroc$SY)
+coffeeGroc$GE <- as.character(coffeeGroc$GE)
+coffeeGroc$VEND <- as.character(coffeeGroc$VEND)
+coffeeGroc$ITEM <- as.character(coffeeGroc$ITEM)
+```
+```{r message=FALSE}
+drugPanel <- read.table("coffee_PANEL_DR_1114_1165.dat", header = TRUE)
+```
+```{r message=FALSE}
+grocPanel <- read.table("coffee_PANEL_GR_1114_1165.dat", header = TRUE)
+```
+```{r message=FALSE}
+massPanel <- read.table("coffee_PANEL_MA_1114_1165.dat", header = TRUE)
+```
+```{r message=FALSE}
+stores <- read_table('Delivery_Stores.dat')
+```
+```{r message=FALSE}
+prodCoffee <- readxl::read_xls('prod_coffee.xls')
+```
+```{r message=FALSE}
+demography <- read.csv('ads demo3(1).csv')
+```
+
+# Join grocery scanner data with prod
+```{r message=FALSE}
+grocProd <- dplyr::left_join(coffeeGroc, prodCoffee, 
+                             by = c('SY'='SY','GE'='GE','VEND'='VEND','ITEM'='ITEM'))
+```
+# Join drug scanner data with prod
+```{r message=FALSE}
+drugProd <- dplyr::left_join(coffeeDrug, prodCoffee, 
+                             by = c('SY'='SY','GE'='GE','VEND'='VEND','ITEM'='ITEM'))
+```
+
+#Join merged grocery data with delivery stores data
+```{r message=FALSE}
+groceryStores <- dplyr::left_join(grocProd, stores, by='IRI_KEY')
+```
+
+#Join merged drug data with delivery stores data
+```{r message=FALSE}
+drugStores <- dplyr::left_join(drugProd, stores, by='IRI_KEY')
+```
+
+# Creating vector of columns to be dropped from the dataset
+```{r message=FALSE}
+dropCols <- c("SY","GE","VEND","ITEM","L1","L9","Level","*STUBSPEC 1440RC                                                         00004","FAT CONTENT","FORM...21","EST_ACV","Open","Clsd")
+```
+
+# Drop unnecessary columns from merged data
+```{r message=FALSE}
+groceryStores <- select(groceryStores, -dropCols)
+```
+
+```{r message=FALSE}
+drugStores <- select(drugStores, -dropCols)
+```
+
