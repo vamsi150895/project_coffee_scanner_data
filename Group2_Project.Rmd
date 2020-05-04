@@ -6,7 +6,9 @@ output: html_notebook
 ```{r message=FALSE}
 library(tidyverse)
 ```
-
+```{r message=FALSE}
+library(ggplot2)
+```
 # Import Files
 ```{r message=FALSE}
 coffeeDrug <- read_table("coffee_drug_1114_1165.dat")
@@ -75,4 +77,61 @@ groceryStores <- select(groceryStores, -dropCols)
 ```{r message=FALSE}
 drugStores <- select(drugStores, -dropCols)
 ```
+
+# Top 6 brands by dollar sales
+```{r message=FALSE}
+top6Brands <- groceryStores %>% 
+  group_by(L5) %>% 
+  summarise(dollar_sales = sum(DOLLARS)) %>% 
+  arrange(desc(dollar_sales)) %>% 
+  top_n(n=6)
+```
+
+```{r message=FALSE}
+ggplot(data=top6Brands, aes(L5,dollar_sales)) + 
+  geom_bar(stat = "identity") +
+  xlab("Brand") + 
+  ylab("Sales") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Top brands by dollar sales within KRAFT FOOD INC.
+```{r message=FALSE}
+groceryStores %>% 
+  filter(L4=="KRAFT FOODS INC.") %>%
+  group_by(L5) %>% 
+  summarise(dollar_sales = sum(DOLLARS)) %>% 
+  arrange(desc(dollar_sales)) %>%
+  top_n(n=5)
+```
+
+# Top brands selling Ground Coffee by dollar sales within KRAFT FOOD INC.
+```{r message=FALSE}
+groceryStores %>% 
+  filter(L4=="KRAFT FOODS INC.", L2=="GROUND COFFEE") %>%
+  group_by(L5) %>% 
+  summarise(dollar_sales = sum(DOLLARS)) %>% 
+  arrange(desc(dollar_sales)) %>%
+  top_n(n=5)
+```
+
+# Top brands selling Ground Coffee by dollar sales within KRAFT FOOD INC. by region
+```{r message=FALSE}
+groceryStores %>% 
+  filter(L4=="KRAFT FOODS INC.", L2=="GROUND COFFEE", L5=="MAXWELL HOUSE") %>%
+  group_by(Market_Name) %>% 
+  summarise(dollar_sales = sum(DOLLARS)) %>% 
+  arrange(desc(dollar_sales)) %>%
+  top_n(n=10)
+```
+
+```{r message=FALSE}
+groceryStores %>% 
+  filter(L4=="KRAFT FOODS INC.", L2=="GROUND COFFEE", L5=="MAXWELL HOUSE") %>%
+  group_by(Market_Name, MskdName) %>% 
+  summarise(dollar_sales = sum(DOLLARS)) %>% 
+  arrange(desc(dollar_sales), .by_group=TRUE) %>%
+  top_n(5)
+```
+
 
