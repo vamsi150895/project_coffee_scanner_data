@@ -201,14 +201,53 @@ drugMaxwell <- drugStores %>%
   filter(L2=="GROUND COFFEE", L5=="MAXWELL HOUSE")
 ```
 
+
 # Create a new column with weight of annual share of display variable(D) for each group of UPC, convert F and PR to dummy variables
 ```{r message=FALSE}
 wtGrocMaxwell <- grocMaxwell %>%
   group_by(UPC) %>%
   mutate(wt = sum(D)/sum(.$D),
          feature = ifelse(F=="NONE",0,1),
-         reduced_price = ifelse(PR==0, 0, 1))
+         disp = ifelse(D==0,0,1))
 ```
+
+```{r message=FALSE}
+featuredSales <- wtGrocMaxwell %>% 
+  group_by(feature) %>%
+  summarise(UnitsSold = sum(UNITS))
+
+prReducedSales <- wtGrocMaxwell %>% 
+  group_by(PR) %>%
+  summarise(UnitsSold = sum(UNITS))
+
+dispSales <- wtGrocMaxwell %>%
+  group_by(disp) %>%
+  summarise(UnitsSold = sum(UNITS))
+```
+
+```{r message=FALSE}
+ggplot(data=featuredSales, aes(reorder(feature,-UnitsSold),UnitsSold)) + 
+  geom_bar(stat = "identity", color="black") +
+  xlab("Feature") + 
+  ylab("Units Sold")
+```
+The number of units sold is greater for non-featured category than featured category. 
+
+```{r message=FALSE}
+ggplot(data=prReducedSales, aes(reorder(PR,-UnitsSold),UnitsSold)) + 
+  geom_bar(stat = "identity", color="black") +
+  xlab("Reduced Price") + 
+  ylab("Units Sold")
+```
+The number of units sold is equivalent for both reduced price and regular price category
+
+```{r message=FALSE}
+ggplot(data=dispSales, aes(reorder(disp,-UnitsSold),UnitsSold)) + 
+  geom_bar(stat = "identity", color="black") +
+  xlab("Display") + 
+  ylab("Units Sold")
+```
+The number of units sold is greater for non-display category than display category.
 
 # Dataset with weekly averages to perform regression
 ```{r message=FALSE}
