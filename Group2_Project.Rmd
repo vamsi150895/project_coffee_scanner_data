@@ -249,6 +249,75 @@ ggplot(data=dispSales, aes(reorder(disp,-UnitsSold),UnitsSold)) +
 ```
 The number of units sold is greater for non-display category than display category.
 
+# Sales distribution by Flavor/Scent
+```{r message=FALSE}
+flavor <- grocMaxwell %>%
+  group_by(`FLAVOR/SCENT`) %>%
+  summarize(DollarSales = sum(DOLLARS/UNITS))
+
+ggplot(data=flavor, aes(reorder(`FLAVOR/SCENT`,-DollarSales),DollarSales)) + 
+  geom_bar(stat = "identity", color="black") +
+  xlab("Flavor") + 
+  ylab("Dollar sales") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Sales distributio by Package
+```{r message=FALSE}
+packaging <- grocMaxwell %>%
+  group_by(PACKAGE) %>%
+  summarize(DollarSales = sum(DOLLARS/UNITS))
+
+ggplot(data=packaging, aes(reorder(PACKAGE,-DollarSales),DollarSales)) + 
+  geom_bar(stat = "identity", color="black") +
+  xlab("Packaging Type") + 
+  ylab("Dollar sales") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Sales distribution by Brewing Method
+```{r message=FALSE}
+bw <- grocMaxwell %>%
+  group_by(`BREWING METHOD`) %>%
+  summarize(DollarSales = sum(DOLLARS/UNITS))
+
+ggplot(data=bw, aes(reorder(`BREWING METHOD`,-DollarSales),DollarSales)) + 
+  geom_bar(stat = "identity", color="black") +
+  xlab("Brewing Method") + 
+  ylab("Dollar sales") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# ANOVA on Flavor, Package and Brewing Method
+
+```{r message=FALSE}
+anovaData <- grocMaxwell %>%
+  mutate(flavor = ifelse(`FLAVOR/SCENT`=="REGULAR",1,0),
+            package = ifelse(PACKAGE=="CAN",1,0),
+            brew = ifelse(`BREWING METHOD`=="ALL PURPOSE",1,0))
+```
+
+# Test if dollar sales of Regular flavor is significantly different from other flavors using ANOVA
+```{r message=FALSE}
+flvTest <- aov(anovaData$DOLLARS/anovaData$UNITS ~ anovaData$flavor)
+summary(flvTest)
+```
+We can statistically conclude that dollar sales of Regular flavor coffee is significantly higher than other flavours. 
+
+# Test if dollar sales of Canned Packaging is significantly different from other packaging using ANOVA
+```{r message=FALSE}
+pkgTest <- aov(anovaData$DOLLARS/anovaData$UNITS ~ anovaData$package)
+summary(pkgTest)
+```
+We can statistically conclude that dollar sales of Canned coffee is significantly higher than other packaging 
+
+# Test if dollar sales of All Purpose brewing methos is significantly different from other brewing methods using ANOVA
+```{r message=FALSE}
+bwTest <- aov(anovaData$DOLLARS/anovaData$UNITS ~ anovaData$brew)
+summary(bwTest)
+```
+We can statistically conclude that dollar sales of all purpose coffee is significantly higher than other brewing methods. 
+
 # Dataset with weekly averages to perform regression
 
 ```{r message=FALSE}
