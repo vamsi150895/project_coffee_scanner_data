@@ -190,3 +190,34 @@ ggplot() +
 ```
 
 It is evident that there is a sales increased during the week when the avg price per ounce was reduced.
+
+# Create a subset of data for Maxwell House ground coffee
+```{r message= FALSE}
+grocMaxwell <- groceryStores %>%
+  filter(L2=="GROUND COFFEE", L5=="MAXWELL HOUSE")
+```
+```{r message=FALSE}
+drugMaxwell <- drugStores %>%
+  filter(L2=="GROUND COFFEE", L5=="MAXWELL HOUSE")
+```
+
+# Create a new column with weight of annual share of display variable(D) for each group of UPC, convert F and PR to dummy variables
+```{r message=FALSE}
+wtGrocMaxwell <- grocMaxwell %>%
+  group_by(UPC) %>%
+  mutate(wt = sum(D)/sum(.$D),
+         feature = ifelse(F=="NONE",0,1),
+         reduced_price = ifelse(PR==0, 0, 1))
+```
+
+# Dataset with weekly averages to perform regression
+```{r message=FALSE}
+regGrocData <- wtGrocMaxwell %>% 
+  group_by(WEEK) %>%
+  summarise(sales = weighted.mean(DOLLARS/UNITS,wt),
+            ppoz = mean((DOLLARS)/(UNITS*VOL_EQ*16)),
+            display = mean(D),
+            featured = mean(feature),
+            pr_reduced = mean(reduced_price))
+```
+
