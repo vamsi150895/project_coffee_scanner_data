@@ -9,6 +9,11 @@ library(tidyverse)
 ```{r message=FALSE}
 library(ggplot2)
 ```
+```{r message=FALSE}
+library(plm)
+```
+
+
 # Import Files
 ```{r message=FALSE}
 coffeeDrug <- read_table("coffee_drug_1114_1165.dat")
@@ -334,4 +339,17 @@ regData <- wtGrocMaxwell %>%
 ```{r message=FALSE}
 mod <- glm(sales~ppoz+display+featured+pr_reduced, data=regData)
 summary(mod)
+```
+
+
+
+# PANEL DATA ANALYSIS
+
+```{r message=FALSE}
+panelData <- rbind(grocPanel, massPanel, drugPanel)
+panelData <- panelData[!duplicated(panelData[c(1,2)]),]
+```
+
+```{r message=FALSE}
+panel <- pdata.frame(panelData, index = c("PANID","WEEK"), drop.index = TRUE)
 ```
