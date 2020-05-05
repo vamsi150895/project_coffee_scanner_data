@@ -88,8 +88,8 @@ top6Brands <- groceryStores %>%
 ```
 
 ```{r message=FALSE}
-ggplot(data=top6Brands, aes(L5,dollar_sales)) + 
-  geom_bar(stat = "identity") +
+ggplot(data=top6Brands, aes(reorder(L5,-dollar_sales),dollar_sales)) + 
+  geom_bar(stat = "identity", color="black") +
   xlab("Brand") + 
   ylab("Sales") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -134,4 +134,59 @@ groceryStores %>%
   top_n(5)
 ```
 
+# Sale of number of units per week
+```{r message=FALSE}
+weeklySales <- groceryStores %>%
+  filter(L4=="KRAFT FOODS INC.", L2=="GROUND COFFEE", L5=="MAXWELL HOUSE") %>%
+  group_by(WEEK) %>%
+  summarise(weekly_sales = sum(UNITS))
+weeklySales
+```
 
+# Line chart of weekly sales
+```{r message=FALSE}
+ggplot(weeklySales, aes(WEEK,weekly_sales)) +
+  geom_line(stat="identity") +
+  xlab("Week") +
+  ylab("Units Sold")
+```
+
+# Weekly price per per ounce
+```{r message=FALSE}
+weeklyPpoz <- groceryStores %>%
+  filter(L4=="KRAFT FOODS INC.", L2=="GROUND COFFEE", L5=="MAXWELL HOUSE") %>%
+  group_by(WEEK) %>%
+  summarise(weekly_ppoz = mean((DOLLARS)/(UNITS*VOL_EQ*16)))
+weeklyPpoz
+```
+
+# Line chart of weekly price per ounce
+```{r message=FALSE}
+ggplot(weeklyPpoz, aes(WEEK,weekly_ppoz)) +
+  geom_line(stat="identity") +
+  xlab("Week") +
+  ylab("Avg Price/ounce")
+```
+
+# Correlation between average price per ounce and number of units sold per week
+```{r message=FALSE}
+cor(weeklySales$weekly_sales, weeklyPpoz$weekly_ppoz)
+```
+We observe that there is a strong correlation between number of units sold with price per ounce
+
+```{r message=FALSE}
+ggplot() +
+  geom_line(data = weeklySales, aes(WEEK,log(weekly_sales)),color="darkred") +
+  xlab("Week") +
+  geom_line(data = weeklyPpoz, aes(WEEK,weekly_ppoz*30), color="steelblue") +
+  scale_y_continuous(name="Units Sold", sec.axis=sec_axis(~./1,name="Avg Price/ounce")) +
+  theme(
+    axis.title.y.left=element_text(color="darkred"),
+    axis.text.y.left=element_text(color="darkred"),
+    axis.title.y.right=element_text(color="steelblue"),
+    axis.text.y.right=element_text(color="steelblue")
+  )
+
+```
+
+It is evident that there is a sales increased during the week when the avg price per ounce was reduced.
