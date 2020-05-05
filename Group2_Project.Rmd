@@ -100,6 +100,15 @@ ggplot(data=top6Brands, aes(reorder(L5,-dollar_sales),dollar_sales)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+# Test if the Dollar sales of Maxwell House is significantly different from FOLGERS in ground coffee category
+```{r message=FALSE}
+max_folger <- groceryStores %>%
+  filter(L2=="GROUND COFFEE", L5 %in% c("MAXWELL HOUSE","FOLGERS"))
+
+t.test((max_folger$DOLLARS)~max_folger$L5)
+```
+
+
 # Top brands by dollar sales within KRAFT FOOD INC.
 ```{r message=FALSE}
 groceryStores %>% 
@@ -348,8 +357,22 @@ summary(mod)
 ```{r message=FALSE}
 panelData <- rbind(grocPanel, massPanel, drugPanel)
 panelData <- panelData[!duplicated(panelData[c(1,2)]),]
+
+panelData <- panelData %>%
+  mutate(dollarSales=DOLLARS/UNITS)
+```
+
+
+# Merge panel data with demographic data
+```{r message=FALSE}
+panelDemo <- dplyr::left_join(panelData, demography, by=c("PANID"="Panelist.ID"))
 ```
 
 ```{r message=FALSE}
-panel <- pdata.frame(panelData, index = c("PANID","WEEK"), drop.index = TRUE)
+panel <- pdata.frame(panelDemo, index = c("PANID","WEEK"), drop.index = TRUE)
+```
+
+
+
+```{r message=FALSE}
 ```
