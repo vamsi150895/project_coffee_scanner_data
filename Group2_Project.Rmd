@@ -250,13 +250,19 @@ ggplot(data=dispSales, aes(reorder(disp,-UnitsSold),UnitsSold)) +
 The number of units sold is greater for non-display category than display category.
 
 # Dataset with weekly averages to perform regression
+
 ```{r message=FALSE}
-regGrocData <- wtGrocMaxwell %>% 
+regData <- wtGrocMaxwell %>% 
   group_by(WEEK) %>%
-  summarise(sales = weighted.mean(DOLLARS/UNITS,wt),
+  summarise(sales = sum(UNITS),
             ppoz = mean((DOLLARS)/(UNITS*VOL_EQ*16)),
             display = mean(D),
             featured = mean(feature),
             pr_reduced = mean(reduced_price))
 ```
 
+# Linear Regression against weekly sales
+```{r message=FALSE}
+mod <- glm(sales~ppoz+display+featured+pr_reduced, data=regData)
+summary(mod)
+```
